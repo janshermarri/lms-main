@@ -2,10 +2,9 @@ from statistics import quantiles
 from lms_main.models import Teacher, Student
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from lms_main.serializers import TeacherSerializer, StudentSerializer
+from lms_main.serializers import TeacherSerializer, StudentSerializer, UserSerializer
 from django.contrib.auth.models import User
 from django.http import JsonResponse
-
 
 class TeacherViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -19,6 +18,14 @@ class TeacherViewSet(viewsets.ModelViewSet):
             user=user, address=request.data['address'], contact=request.data['contact'], qualifications=request.data['qualifications'])
         new_record = TeacherSerializer(teacher)
         return JsonResponse({"new_record": new_record.data, "status": "new record success"})
+    
+    def destroy(self, request, *args, **kwargs):
+        try:
+            user = User.objects.get(id=kwargs.get('pk'))
+            user.delete()
+            return JsonResponse({"status": "delete record success"})
+        except:
+            return JsonResponse({"status": "delete record error"}, status=500)
 
     def perform_create(self, serializer):
         serializer.save()
