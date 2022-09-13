@@ -1,7 +1,7 @@
-from lms_main.models import Teacher, Student, Comment
+from lms_main.models import Teacher, Student, Comment, TeacherStudentSession
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from lms_main.serializers import TeacherSerializer, StudentSerializer, CommentSerializer
+from lms_main.serializers import TeacherSerializer, StudentSerializer, CommentSerializer, TeacherStudentSessionSerializer
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 
@@ -55,7 +55,32 @@ class StudentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save()
 
+
 class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
+    def create(self, request, *args, **kwargs):
+        comment = Comment.objects.create(
+            user_id=request.data['user_id'], comments=request.data['comments'])
+        new_record = CommentSerializer(comment)
+        return JsonResponse({"new_record": new_record.data, "status": "new record success"})
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+
+class TeacherStudentSessionViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = TeacherStudentSession.objects.all()
+    serializer_class = TeacherStudentSession
+
+    def create(self, request, *args, **kwargs):
+        teacher_student_session = TeacherStudentSession.objects.create(
+            teacher_id=request.data['teacher_id'], student_id=request.data['student_id'])
+        new_record = TeacherStudentSessionSerializer(teacher_student_session)
+        return JsonResponse({"new_record": new_record.data, "status": "new record success"})
+
+    def perform_create(self, serializer):
+        serializer.save()
