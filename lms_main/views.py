@@ -41,7 +41,7 @@ class StudentViewSet(viewsets.ModelViewSet):
         user = User.objects.create(
             first_name=request.data['first_name'], last_name=request.data['last_name'], email=request.data['email'], username=request.data['username'])
         student = Student.objects.create(
-            user=user, address=request.data['address'], contact=request.data['contact'], qualifications=request.data['guardian'])
+            user=user, address=request.data['address'], contact=request.data['contact'], guardian=request.data['guardian'])
         new_record = StudentSerializer(student)
         return JsonResponse({"new_record": new_record.data, "status": "new record success"})
 
