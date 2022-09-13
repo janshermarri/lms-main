@@ -18,3 +18,10 @@ class Student(models.Model):
 
     def __str__(self):
         return (self.user.first_name + " " + self.user.last_name)
+
+class Comment(models.Model):
+    user = models.ManyToManyField(User, related_name="comments")
+    comments = models.TextField(blank=False)
+
+    def __str__(self):
+        return (self.user.first_name + " " + self.user.last_name + ": " + self.comments)

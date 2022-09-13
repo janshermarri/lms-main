@@ -1,8 +1,7 @@
-from statistics import quantiles
-from lms_main.models import Teacher, Student
+from lms_main.models import Teacher, Student, Comment
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from lms_main.serializers import TeacherSerializer, StudentSerializer, UserSerializer
+from lms_main.serializers import TeacherSerializer, StudentSerializer, CommentSerializer
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 
@@ -55,3 +54,8 @@ class StudentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save()
+
+class CommentViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer

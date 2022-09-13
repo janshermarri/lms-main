@@ -1,7 +1,7 @@
 from statistics import mode
 from rest_framework import serializers
 from lms_main import models
-from lms_main.models import Teacher, Student
+from lms_main.models import Teacher, Student, Comment
 from django.contrib.auth.models import User
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,3 +20,10 @@ class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = ['id', 'user', 'address', 'contact', 'guardian']
+
+class CommentSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'user', 'comments', 'created_at', 'updated_at']
