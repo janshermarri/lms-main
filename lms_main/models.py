@@ -19,16 +19,18 @@ class Student(models.Model):
     def __str__(self):
         return (self.user.first_name + " " + self.user.last_name)
 
-class Comment(models.Model):
-    user = models.ForeignKey(User, related_name="comments", on_delete=models.CASCADE)
-    comments = models.TextField(blank=False)
-
-    def __str__(self):
-        return (self.user.first_name + " " + self.user.last_name + ": " + self.comments)
-
 class TeacherStudentSession(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'Teacher: {self.teacher.first_name} {self.teacher.last_name}, Student: {self.student.first_name} {self.student.last_name}'
+
+
+class Comment(models.Model):
+    teacher_student_session = models.ForeignKey(TeacherStudentSession, related_name="session", on_delete=models.CASCADE)
+    comments = models.TextField(blank=False)
+
+    def __str__(self):
+        return self.comments
+

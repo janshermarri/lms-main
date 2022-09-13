@@ -63,7 +63,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         comment = Comment.objects.create(
-            user_id=request.data['user_id'], comments=request.data['comments'])
+            teacher_student_session_id=request.data['session_id'], comments=request.data['comments'])
         new_record = CommentSerializer(comment)
         return JsonResponse({"new_record": new_record.data, "status": "new record success"})
 
@@ -74,7 +74,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 class TeacherStudentSessionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = TeacherStudentSession.objects.all()
-    serializer_class = TeacherStudentSession
+    serializer_class = TeacherStudentSessionSerializer
 
     def create(self, request, *args, **kwargs):
         teacher_student_session = TeacherStudentSession.objects.create(
