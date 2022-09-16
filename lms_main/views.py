@@ -1,6 +1,6 @@
 from lms_main.models import Teacher, Student, Comment, TeacherStudentSession
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from lms_main.serializers import TeacherSerializer, StudentSerializer, CommentSerializer, TeacherStudentSessionSerializer, MyTokenObtainPairSerializer
 from django.contrib.auth.models import User
 from django.http import JsonResponse
@@ -13,7 +13,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 
 class TeacherViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
 
@@ -38,7 +38,7 @@ class TeacherViewSet(viewsets.ModelViewSet):
 
 
 class StudentViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdminUser]
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
 
@@ -64,8 +64,19 @@ class StudentViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
-    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
+    def list(self, request, *args, **kwargs):
+        records = {}
+        user_group = request.user.groups.all()[0].name
+        if user_group == 'admin':
+            records = Comment.objects.all() 
+        if user_group == 'teacher':
+            records = Comment.objects.filter(teacher_student_session__teacher__user__id=request.user.id) 
+        if user_group == 'student':
+            records = Comment.objects.filter(teacher_student_session__student__user__id=request.user.id) 
+        comments = CommentSerializer(records, many=True)
+        return JsonResponse({'records': comments.data})
 
     def create(self, request, *args, **kwargs):
         comment = Comment.objects.create(
