@@ -1,10 +1,16 @@
 from lms_main.models import Teacher, Student, Comment, TeacherStudentSession
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from lms_main.serializers import TeacherSerializer, StudentSerializer, CommentSerializer, TeacherStudentSessionSerializer
+from lms_main.serializers import TeacherSerializer, StudentSerializer, CommentSerializer, TeacherStudentSessionSerializer, MyTokenObtainPairSerializer
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
 
 class TeacherViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
