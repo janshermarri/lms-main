@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.views import TokenObtainPairView
-
+from django.contrib.auth.models import Group
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
@@ -18,8 +18,10 @@ class TeacherViewSet(viewsets.ModelViewSet):
     serializer_class = TeacherSerializer
 
     def create(self, request, *args, **kwargs):
+        teacher_group = Group.objects.get(name='teacher')
         user = get_user_model().objects.create_user(
             first_name=request.data['first_name'], last_name=request.data['last_name'], email=request.data['email'], username=request.data['username'], password=request.data['password'],)
+        user.groups.add(teacher_group)
         teacher = Teacher.objects.create(
             user=user, address=request.data['address'], contact=request.data['contact'], qualifications=request.data['qualifications'])
         new_record = TeacherSerializer(teacher)
@@ -43,8 +45,10 @@ class StudentViewSet(viewsets.ModelViewSet):
     serializer_class = StudentSerializer
 
     def create(self, request, *args, **kwargs):
+        student_group = Group.objects.get(name='student')
         user = get_user_model().objects.create_user(
             first_name=request.data['first_name'], last_name=request.data['last_name'], email=request.data['email'], username=request.data['username'], password=request.data['password'],)
+        user.groups.add(student_group)
         student = Student.objects.create(
             user=user, address=request.data['address'], contact=request.data['contact'], guardian=request.data['guardian'])
         new_record = StudentSerializer(student)
@@ -70,17 +74,22 @@ class CommentViewSet(viewsets.ModelViewSet):
         records = {}
         user_group = request.user.groups.all()[0].name
         if user_group == 'admin':
-            records = Comment.objects.all() 
+            records = Comment.objects.all()
         if user_group == 'teacher':
-            records = Comment.objects.filter(teacher_student_session__teacher__user__id=request.user.id) 
+            records = Comment.objects.filter(
+                teacher_student_session__teacher__user__id=request.user.id)
         if user_group == 'student':
-            records = Comment.objects.filter(teacher_student_session__student__user__id=request.user.id) 
+            records = Comment.objects.filter(
+                teacher_student_session__student__user__id=request.user.id)
         comments = CommentSerializer(records, many=True)
         return JsonResponse({'records': comments.data})
 
     def create(self, request, *args, **kwargs):
         comment = Comment.objects.create(
-            teacher_student_session_id=request.data['session_id'], comments=request.data['comments'])
+            teacher_student_session_id=request.data['session_id'], 
+            comments=request.data['comments'],
+            created_by_id=request.user.id
+            )
         new_record = CommentSerializer(comment)
         return JsonResponse({"new_record": new_record.data, "status": "new record success"})
 
@@ -92,6 +101,20 @@ class TeacherStudentSessionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = TeacherStudentSession.objects.all()
     serializer_class = TeacherStudentSessionSerializer
+
+    def list(self, request, *args, **kwargs):
+        records = {}
+        user_group = request.user.groups.all()[0].name
+        if user_group == 'admin':
+            records = TeacherStudentSession.objects.all()
+        if user_group == 'teacher':
+            records = TeacherStudentSession.objects.filter(
+                teacher__user__id=request.user.id)
+        if user_group == 'student':
+            records = TeacherStudentSession.objects.filter(
+                student__user__id=request.user.id)
+        sessions = TeacherStudentSessionSerializer(records, many=True)
+        return JsonResponse({'records': sessions.data})
 
     def create(self, request, *args, **kwargs):
         teacher_student_session = TeacherStudentSession.objects.create(

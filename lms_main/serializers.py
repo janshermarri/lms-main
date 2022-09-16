@@ -40,7 +40,7 @@ class TeacherStudentSessionSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     teacher_student_session = TeacherStudentSessionSerializer(read_only=True)
-
+    created_by = UserSerializer(read_only=True)
     class Meta:
         model = Comment
-        fields = ['id', 'teacher_student_session', 'comments']
+        fields = ['id', 'created_by', 'teacher_student_session', 'comments']

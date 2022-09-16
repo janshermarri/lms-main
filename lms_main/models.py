@@ -29,6 +29,7 @@ class TeacherStudentSession(models.Model):
 
 class Comment(models.Model):
     teacher_student_session = models.ForeignKey(TeacherStudentSession, related_name="session", on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     comments = models.TextField(blank=False)
 
     def __str__(self):
